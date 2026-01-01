@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(pnpm build:*)",
-      "Bash(pnpm typecheck:*)"
+      "Bash(pnpm typecheck:*)",
+      "Bash(pnpm run zip:*)",
+      "Bash(ls:*)",
+      "Bash(openssl rsa:*)"
     ]
   }
 }

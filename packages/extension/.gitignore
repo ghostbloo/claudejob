@@ -1,0 +1,7 @@
+# Private key - BACK THIS UP SECURELY!
+key.pem
+
+# Built extension
+dist/
+*.crx
+*.zip
