@@ -40,7 +40,6 @@ interface DeviceMessage {
 }
 
 const DEFAULT_STRENGTH = 0.15; // Low intensity for ambient presence
-const INACTIVITY_TIMEOUT_MS = 30_000; // Stop device after 30s of no activity
 
 export class IntifaceState {
   // Connection state
@@ -62,9 +61,6 @@ export class IntifaceState {
 
   // Last working count
   private lastWorkingCount: number = 0;
-
-  // Inactivity timeout - stops device if no state updates received
-  private inactivityTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     wsUrl: string = process.env.INTIFACE_WS_URL ?? "ws://127.0.0.1:12345"
@@ -98,35 +94,7 @@ export class IntifaceState {
         }
       }
 
-      // Reset inactivity timer when working
-      if (isNowWorking) {
-        this.resetInactivityTimer();
-      } else {
-        this.clearInactivityTimer();
-      }
-
       this.lastWorkingCount = message.working;
-    }
-  }
-
-  private resetInactivityTimer(): void {
-    this.clearInactivityTimer();
-    this.inactivityTimer = setTimeout(async () => {
-      console.log('[intiface] Inactivity timeout - stopping device');
-      try {
-        await this.stop(this.device);
-      } catch (err) {
-        console.error('[intiface] Failed to stop device on timeout:', err);
-      }
-      // Reset state so next working message triggers vibration
-      this.lastWorkingCount = 0;
-    }, INACTIVITY_TIMEOUT_MS);
-  }
-
-  private clearInactivityTimer(): void {
-    if (this.inactivityTimer) {
-      clearTimeout(this.inactivityTimer);
-      this.inactivityTimer = null;
     }
   }
 
@@ -374,7 +342,6 @@ export class IntifaceState {
   }
 
   async disconnect(): Promise<void> {
-    this.clearInactivityTimer();
     if (this.ws) {
       this.ws.close();
       this.ws = null;
