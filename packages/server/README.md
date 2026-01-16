@@ -1,6 +1,8 @@
-# claude-blocker
+# claude-blocker (Intiface Fork)
 
-CLI tool and server for [Claude Blocker](https://github.com/t3-content/claude-blocker) — block distracting websites unless Claude Code is actively running inference.
+CLI tool and server for Claude Blocker — block distracting websites and get haptic feedback while Claude Code is actively running inference.
+
+This fork adds [Intiface Central](https://intiface.com/central/) integration for ambient vibration feedback while Claude is working.
 
 ## Installation
 
@@ -31,6 +33,12 @@ npx claude-blocker --setup
 # Custom port
 npx claude-blocker --port 9000
 
+# With Intiface haptic feedback
+npx claude-blocker --intiface-url ws://127.0.0.1:12345
+
+# Combine options
+npx claude-blocker --port 9000 --intiface-url ws://127.0.0.1:12345
+
 # Remove hooks from Claude Code
 npx claude-blocker --remove
 
@@ -50,11 +58,17 @@ npx claude-blocker --help
    - Tracks all active Claude Code sessions
    - Knows when sessions are "working" vs "idle"
    - Broadcasts state via WebSocket to the Chrome extension
+   - Optionally controls haptic devices via Intiface Central
 
 3. **Extension** — Connects to the server and:
    - Blocks configured sites when no sessions are working
    - Shows a modal overlay (soft block, not network block)
    - Updates in real-time without page refresh
+
+4. **Intiface (optional)** — When enabled:
+   - Connects to Intiface Central via WebSocket
+   - Provides ambient vibration (15% intensity) while Claude is actively working
+   - Automatically stops when Claude finishes or becomes idle
 
 ## API
 
@@ -86,14 +100,21 @@ import { startServer } from 'claude-blocker';
 // Start on default port (8765)
 startServer();
 
-// Or custom port
-startServer(9000);
+// Custom port
+startServer({ port: 9000 });
+
+// With Intiface haptic feedback
+startServer({
+  port: 8765,
+  intifaceUrl: 'ws://127.0.0.1:12345'
+});
 ```
 
 ## Requirements
 
 - Node.js 18+
 - [Claude Code](https://claude.ai/claude-code)
+- [Intiface Central](https://intiface.com/central/) (optional, for haptic feedback)
 
 ## License
 

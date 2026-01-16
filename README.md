@@ -1,8 +1,10 @@
-# Claude Blocker
+# Claude Blocker (Intiface Fork)
 
-Block distracting websites unless [Claude Code](https://claude.ai/claude-code) is actively running inference.
+Block distracting websites and get haptic feedback while [Claude Code](https://claude.ai/claude-code) is actively running inference.
 
 **The premise is simple:** if Claude is working, you should be too. When Claude stops, your distractions come back.
+
+**Plus haptic feedback:** This fork integrates with [Intiface Central](https://intiface.com/central/) to provide ambient vibration feedback while Claude is actively working, creating a physical presence indicator.
 
 ## How It Works
 
@@ -10,17 +12,31 @@ Block distracting websites unless [Claude Code](https://claude.ai/claude-code) i
 ┌─────────────────┐     hooks      ┌─────────────────┐    websocket    ┌─────────────────┐
 │   Claude Code   │ ─────────────► │  Blocker Server │ ◄─────────────► │ Chrome Extension│
 │   (terminal)    │                │  (localhost)    │                 │   (browser)     │
-└─────────────────┘                └─────────────────┘                 └─────────────────┘
-       │                                   │                                   │
-       │ UserPromptSubmit                  │ tracks sessions                   │ blocks sites
-       │ PreToolUse                        │ broadcasts state                  │ shows modal
-       │ Stop                              │                                   │ bypass button
-       └───────────────────────────────────┴───────────────────────────────────┘
+└─────────────────┘                └────────┬────────┘                 └─────────────────┘
+       │                                     │                                   │
+       │ UserPromptSubmit                    │ tracks sessions                   │ blocks sites
+       │ PreToolUse                          │ broadcasts state                  │ shows modal
+       │ Stop                                │                                   │ bypass button
+       └─────────────────────────────────────┴───────────────────────────────────┘
+                                             │
+                                     websocket (optional)
+                                             │
+                                             ▼
+                                    ┌─────────────────┐
+                                    │ Intiface Central│
+                                    │  (buttplug.io)  │
+                                    └────────┬────────┘
+                                             │
+                                        vibration
+                                             │
+                                             ▼
+                                       [Your Device]
 ```
 
 1. **Claude Code hooks** notify the server when you submit a prompt or when Claude finishes
 2. **Blocker server** tracks all Claude Code sessions and their working/idle states
 3. **Chrome extension** blocks configured sites when no session is actively working
+4. **Intiface integration (optional)** provides ambient vibration while Claude is actively working
 
 ## Quick Start
 
@@ -43,6 +59,20 @@ Click the extension icon → Settings to add sites you want blocked when Claude 
 
 Default blocked sites: `x.com`, `youtube.com`
 
+### 4. (Optional) Enable Intiface haptic feedback
+
+To get ambient vibration feedback while Claude is working:
+
+1. Download and install [Intiface Central](https://intiface.com/central/)
+2. Connect your compatible device (see [supported devices](https://iostindex.com/?filter0Availability=Available))
+3. Start Intiface Central and ensure the websocket server is running (default: `ws://127.0.0.1:12345`)
+4. Restart claude-blocker with the `--intiface-url` flag:
+   ```bash
+   npx claude-blocker --intiface-url ws://127.0.0.1:12345
+   ```
+
+Your device will vibrate with a low ambient presence (15% intensity by default) while Claude Code is actively working.
+
 ## Server CLI
 
 ```bash
@@ -51,6 +81,12 @@ npx claude-blocker --setup
 
 # Start on custom port
 npx claude-blocker --port 9000
+
+# Start with Intiface haptic feedback
+npx claude-blocker --intiface-url ws://127.0.0.1:12345
+
+# Combine options
+npx claude-blocker --port 9000 --intiface-url ws://127.0.0.1:12345
 
 # Remove hooks from Claude Code settings
 npx claude-blocker --remove
@@ -67,12 +103,14 @@ npx claude-blocker --help
 - **Emergency bypass** — 5-minute bypass, once per day
 - **Configurable sites** — Add/remove sites from extension settings
 - **Works offline** — Blocks everything when server isn't running (safety default)
+- **Haptic feedback (new!)** — Optional Intiface integration provides ambient vibration while Claude is actively working
 
 ## Requirements
 
 - Node.js 18+
 - Chrome (or Chromium-based browser)
 - [Claude Code](https://claude.ai/claude-code)
+- [Intiface Central](https://intiface.com/central/) (optional, for haptic feedback)
 
 ## Development
 
