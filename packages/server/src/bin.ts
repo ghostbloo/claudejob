@@ -29,14 +29,16 @@ Usage:
   npx claude-blocker [options]
 
 Options:
-  --setup     Configure Claude Code hooks
-  --remove    Remove Claude Code hooks
-  --port      Server port (default: ${DEFAULT_PORT})
-  --help      Show this help message
+  --setup          Configure Claude Code hooks
+  --remove         Remove Claude Code hooks
+  --port           Server port (default: ${DEFAULT_PORT})
+  --intiface-url   URL for Intiface Central websocket for haptics integration
+  --help           Show this help message
 
 Examples:
   npx claude-blocker            # Start the server (prompts for setup on first run)
   npx claude-blocker --port 9000
+  npx claude-blocker --intiface-url ws://localhost:12345
 `);
 }
 
@@ -69,6 +71,13 @@ async function main(): Promise<void> {
     }
   }
 
+  // Intiface Central WebSocket URL for haptics
+  let intifaceUrl: string | undefined;
+  const intifaceUrlIndex = args.indexOf("--intiface-url");
+  if (intifaceUrlIndex !== -1 && args[intifaceUrlIndex + 1]) {
+    intifaceUrl = args[intifaceUrlIndex + 1];
+  }
+
   // Check if hooks are configured, prompt for setup if not
   if (!areHooksConfigured()) {
     console.log("Claude Blocker hooks are not configured yet.\n");
@@ -83,7 +92,7 @@ async function main(): Promise<void> {
     }
   }
 
-  startServer(port);
+  startServer({ port, intifaceUrl });
 }
 
 main();

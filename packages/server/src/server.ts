@@ -3,6 +3,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import type { HookPayload, ClientMessage } from "./types.js";
 import { DEFAULT_PORT } from "./types.js";
 import { state } from "./state.js";
+import { IntifaceState } from "./intiface.js";
 
 function parseBody(req: IncomingMessage): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -18,7 +19,14 @@ function sendJson(res: ServerResponse, data: unknown, status = 200): void {
   res.end(JSON.stringify(data));
 }
 
-export function startServer(port: number = DEFAULT_PORT): void {
+export interface ServerOptions {
+  port?: number;
+  intifaceUrl?: string;
+}
+
+export function startServer(options: ServerOptions = {}): void {
+  const port = options.port ?? DEFAULT_PORT;
+
   const server = createServer(async (req, res) => {
     // CORS headers for local development
     res.setHeader("Access-Control-Allow-Origin", "*");
@@ -97,18 +105,27 @@ export function startServer(port: number = DEFAULT_PORT): void {
     });
   });
 
+  // Intiface state
+  if (options.intifaceUrl) {
+    const intifaceState = new IntifaceState(options.intifaceUrl);
+    state.subscribe(async (message) => {
+      intifaceState.onSessionStateMessage(message);
+    });
+  }
+
   server.listen(port, () => {
     console.log(`
-┌─────────────────────────────────────┐
-│                                     │
-│   Claude Blocker Server             │
-│                                     │
-│   HTTP:      http://localhost:${port}  │
-│   WebSocket: ws://localhost:${port}/ws │
-│                                     │
-│   Waiting for Claude Code hooks...  │
-│                                     │
-└─────────────────────────────────────┘
+┌──────────────────────────────────────────┐
+│                                          |
+│   Claude Blocker Server                  │
+│                                          |
+│   HTTP:      http://localhost:${port}    │
+│   WebSocket: ws://localhost:${port}/ws   │
+${options.intifaceUrl ? `│   Intiface:    ${options.intifaceUrl}        |` : ''}
+│                                          |
+│   Waiting for Claude Code hooks...       |
+│                                          |
+└──────────────────────────────────────────┘
 `);
   });
 
