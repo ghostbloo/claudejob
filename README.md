@@ -38,6 +38,8 @@ Integrates with [Intiface Central](https://intiface.com/central/) (buttplug.io) 
 
 ## Quick Start
 
+### 0. clone the repo and install with pnpm cause this fork isn't on npm
+
 ### 1. Install the server
 
 ```bash
