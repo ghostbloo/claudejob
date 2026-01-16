@@ -1,10 +1,8 @@
-# Claude Blocker (Intiface Fork)
+# Claudejob
 
-Block distracting websites and get haptic feedback while [Claude Code](https://claude.ai/claude-code) is actively running inference.
+Activate your sex toys while [Claude Code](https://claude.ai/claude-code) is working, block distracting websites when it isn't.
 
-**The premise is simple:** if Claude is working, you should be too. When Claude stops, your distractions come back.
-
-**Plus haptic feedback:** This fork integrates with [Intiface Central](https://intiface.com/central/) to provide ambient vibration feedback while Claude is actively working, creating a physical presence indicator.
+Integrates with [Intiface Central](https://intiface.com/central/) (buttplug.io) to provide ambient vibration feedback while Claude is actively working, creating a physical presence indicator.
 
 ## How It Works
 
